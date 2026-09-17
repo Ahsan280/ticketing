@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///Users/muhammadahsanrehman/microservices-course/ticketing/client/pages/index.js"],"sourcesContent":["function index() {\n  return <div>Landing Page</div>;\n}\n\nexport default index;\n"],"names":["index"],"mappings":";;;;;;AAAA,SAASA;IACP,qBAAO,qKAAC;kBAAI;;;;;;AACd;uCAEeA"}}]
+}
