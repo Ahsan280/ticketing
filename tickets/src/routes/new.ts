@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express";
 import { body } from "express-validator";
 import { Ticket } from "../models/ticket.model";
 import { TicketCreatedPublisher } from "../events/publishers/ticket-created-publisher";
+import { natsWrapper } from "../nats-wrapper";
 const router = Router();
 
 router.post("/api/tickets", requireAuth, [
@@ -12,7 +13,7 @@ router.post("/api/tickets", requireAuth, [
   const { title, price } = req.body;
   const ticket = Ticket.build({ title, price, userId: req.currentUser?.id! });
   await ticket.save();
-  new TicketCreatedPublisher(client).publish({ id: ticket._id.toString(), title: ticket.title, price: ticket.price, userId: req.currentUser!.id });
+  new TicketCreatedPublisher(natsWrapper.client).publish({ id: ticket._id.toString(), title: ticket.title, price: ticket.price, userId: req.currentUser!.id });
   res.status(201).send(ticket);
 });
 
