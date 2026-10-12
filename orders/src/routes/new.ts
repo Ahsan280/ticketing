@@ -1,10 +1,12 @@
-import { requireAuth, validateRequest } from "@ah-tickets/common";
+import { BadRequestError, NotFoundError, OrderStatus, requireAuth, validateRequest } from "@ah-tickets/common";
 import mongoose from "mongoose";
 import { body } from "express-validator";
 import { Router, Request, Response } from "express";
+import { Ticket } from "../models/ticket";
+import { Order } from "../models/orders";
 
 const router = Router();
-
+const EXPIRATION_WINDOW_SECONDS = 15 * 60;
 router.post("/api/orders", requireAuth, [
     body("ticketId")
         .not()
@@ -12,7 +14,28 @@ router.post("/api/orders", requireAuth, [
         .custom((input: string) => mongoose.Types.ObjectId.isValid(input))
         .withMessage("Ticket Id must be provided")
 ], validateRequest, async (req: Request, res: Response) => {
-    res.status(200).send({});
+    // find the ticket the user is trying to order in the database
+    const { ticketId } = req.body;
+    const ticket = await Ticket.findById(ticketId);
+
+    if (!ticket) {
+        throw new NotFoundError();
+    }
+    // Make sure that this ticket is not already reserved
+    const isReserved = await ticket.isReserved();
+    if (isReserved) {
+        throw new BadRequestError("Ticket is already reserved");
+    }
+    // Calculate an expiration date for this order
+    const expiration = new Date();
+    expiration.setSeconds(expiration.getSeconds() + EXPIRATION_WINDOW_SECONDS);
+
+    // Build the order and save it to the database
+    const order = Order.build({ userId: req.currentUser!.id, expiresAt: expiration, ticket, status: OrderStatus.Created });
+    await order.save();
+
+    // Publish an event that order has been created
+    res.status(201).send(order);
 });
 
 export { router as newOrderRouter };
