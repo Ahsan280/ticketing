@@ -4,6 +4,8 @@ import { body } from "express-validator";
 import { Router, Request, Response } from "express";
 import { Ticket } from "../models/ticket";
 import { Order } from "../models/orders";
+import { natsWrapper } from "../nats-wrapper";
+import { OrderCreatedPublisher } from "../events/publishers/order-created-publisher";
 
 const router = Router();
 const EXPIRATION_WINDOW_SECONDS = 15 * 60;
@@ -35,6 +37,18 @@ router.post("/api/orders", requireAuth, [
     await order.save();
 
     // Publish an event that order has been created
+    new OrderCreatedPublisher(natsWrapper.client).publish(
+        {
+            id: order._id.toString(),
+            status: order.status,
+            userId: order.userId,
+            expiresAt: order.expiresAt.toISOString(),
+            ticket: {
+                id: ticket._id.toString(),
+                price: ticket.price
+            }
+        }
+    )
     res.status(201).send(order);
 });
 

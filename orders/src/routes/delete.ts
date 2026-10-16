@@ -1,6 +1,8 @@
 import { NotFoundError, OrderStatus, requireAuth } from "@ah-tickets/common";
 import { Router, Request, Response } from "express";
 import { Order } from "../models/orders";
+import { OrderCancelledPublishser } from "../events/publishers/order-cancelled-publisher";
+import { natsWrapper } from "../nats-wrapper";
 
 const router = Router();
 
@@ -14,6 +16,14 @@ router.delete("/api/orders/:orderId", requireAuth, async (req: Request, res: Res
     throw new NotFoundError();
   }
   // publish an event saying that this order was cancelled
+  new OrderCancelledPublishser(natsWrapper.client).publish(
+    {
+      id: order._id.toString(),
+      ticket: {
+        id: order.ticket._id.toString(),
+      }
+    }
+  )
   res.status(200).send(order);
 });
 
