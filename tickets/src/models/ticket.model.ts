@@ -9,7 +9,8 @@ interface TicketAttrs {
 interface TicketDoc extends mongoose.Document {
     title: string;
     price: number;
-    userId: string
+    userId: string;
+    version: string;
 }
 
 interface TicketModel extends mongoose.Model<TicketDoc> {
@@ -31,9 +32,14 @@ const ticketSchema = new mongoose.Schema({
         required: true
     },
 }, {
+    // 1. Rename the built-in version tracking field from __v to version
+    versionKey: 'version',
+    // 2. Enable modern native Optimistic Concurrency Control instead of the plugin
+    optimisticConcurrency: true,
     toJSON: {
         transform(doc, ret: any) {
             delete ret.__v;
+            delete ret.version;
             ret.id = ret._id;
             delete ret._id;
         },
