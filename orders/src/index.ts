@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { app } from "./app";
 import { natsWrapper } from "./nats-wrapper";
+import { TicketCreatedListener } from "./events/listeners/ticket-created-listener";
+import { TicketUpdatedListener } from "./events/listeners/ticket-updated-listener";
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error("JWT_KEY must be defined");
@@ -31,10 +33,12 @@ const start = async () => {
     process.on("SIGINT", () => natsWrapper.client.close());
     process.on("SIGTERM", () => natsWrapper.client.close());
 
+    new TicketCreatedListener(natsWrapper.client).listen();
+    new TicketUpdatedListener(natsWrapper.client).listen();
 
-    app.listen(4001, () => {
+    app.listen(4002, () => {
       console.log("JWT SECRET: ", process.env.JWT_KEY);
-      console.log("Tickets listening on port 4001 !! ");
+      console.log("Orders listening on port 4002 !! ");
     });
   } catch (err) {
     console.error(err);
