@@ -21,6 +21,7 @@ router.delete("/api/orders/:orderId", requireAuth, async (req: Request, res: Res
       id: order._id.toString(),
       ticket: {
         id: order.ticket._id.toString(),
+        version: order.ticket.version,
       }
     }
   )
