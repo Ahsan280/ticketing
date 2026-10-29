@@ -1,4 +1,4 @@
-import { NotAuthorizedError, NotFoundError, requireAuth, validateRequest } from "@ah-tickets/common";
+import { BadRequestError, NotAuthorizedError, NotFoundError, requireAuth, validateRequest } from "@ah-tickets/common";
 import { Router, Request, Response } from "express";
 import { body } from "express-validator";
 import { Ticket } from "../models/ticket.model";
@@ -18,6 +18,9 @@ router.put("/api/tickets/:id", requireAuth, [
         throw new NotFoundError();
     }
 
+    if (ticket.orderId) {
+        throw new BadRequestError('Ticket is already reserved');
+    }
     if (ticket.userId !== req.currentUser?.id) {
         throw new NotAuthorizedError();
     }
