@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ah-tickets/common": "^1.1.6",
+    "@ah-tickets/common": "^1.1.7",
     "@types/bull": "^3.15.9",
     "@types/express": "^5.0.6",
     "bull": "^4.16.5",
