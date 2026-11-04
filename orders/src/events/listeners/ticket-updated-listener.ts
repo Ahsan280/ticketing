@@ -9,9 +9,10 @@ export class TicketUpdatedListener extends Listener<TicketUpdatedEvent> {
     async onMessage(data: TicketUpdatedEvent['data'], msg: Message): Promise<void> {
         const ticket = await Ticket.findByEvent(data);
         if (!ticket) {
-            throw new NotFoundError();
+            throw new Error('Ticket not found');
         }
         ticket.set({ title: data.title, price: data.price });
+        ticket.markModified("title");
         await ticket.save();
         msg.ack();
     }

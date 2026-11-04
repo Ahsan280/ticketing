@@ -43,6 +43,15 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+
+    - image: ahsan280/payments
+      context: payments
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     
     - image: ahsan280/client
       context: client
