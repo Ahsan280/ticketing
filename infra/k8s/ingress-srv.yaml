@@ -10,6 +10,14 @@ spec:
     - host: tickets.dev
       http:
         paths:
+          - path: /api/payments/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payments-srv
+                port: 
+                  number: 4003
+
           - path: /api/users/?(.*)
             pathType: ImplementationSpecific
             backend:

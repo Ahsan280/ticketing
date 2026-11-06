@@ -4,6 +4,7 @@ import express from "express";
 // import { NotFoudError } from "./errors/not-fount-error";
 import cookieSession from "cookie-session";
 import { currentUser, errorHandler, NotFoundError } from "@ah-tickets/common";
+import { creatChargeRouter } from "./routes/new";
 
 const app = express();
 app.set("trust proxy", true);
@@ -13,7 +14,7 @@ app.use(
 );
 
 app.use(currentUser);
-
+app.use(creatChargeRouter);
 
 app.all("/{*any}", async () => {
   throw new NotFoundError();
