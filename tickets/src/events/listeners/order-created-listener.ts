@@ -8,7 +8,6 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
     subject: Subjects.OrderCreated = Subjects.OrderCreated;
     queueGroupName: string = queueGroupName;
     async onMessage(data: OrderCreatedEvent['data'], msg: Message): Promise<void> {
-        console.log('Received data');
         // Find the ticket
         const ticket = await Ticket.findById(data.ticket.id);
         // if no ticket throw an error

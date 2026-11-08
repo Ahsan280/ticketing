@@ -13,6 +13,11 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
         if (!order) {
             throw new Error("Order not found");
         }
+
+        if (order.status === OrderStatus.Complete) {
+            msg.ack();
+            return;
+        }
         // if not then update the order status to cancel
         order.set({ status: OrderStatus.Cancelled });
         await order.save();
@@ -28,6 +33,8 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
             })
 
         msg.ack();
+        // Note: we are updating the ticket in the OrderCancelledListener in the ticket's service so the that is the answer to the below question
         // we also need to update the ticket as it is not reserved anymore. where to do that? in the order cancelled listener??
+
     }
 }

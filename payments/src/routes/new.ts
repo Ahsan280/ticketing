@@ -3,6 +3,9 @@ import { Request, Response, Router } from "express"
 import { BadRequestError, NotAuthorizedError, NotFoundError, OrderStatus, requireAuth, validateRequest } from "@ah-tickets/common";
 import { Order } from "../models/order";
 import { stripe } from "../stripe";
+import { Payment } from "../models/payment";
+import { PaymentCreatedPublisher } from "../events/publishers/payment-created-publisher";
+import { natsWrapper } from "../nats-wrapper";
 
 const router = Router();
 
@@ -26,12 +29,21 @@ router.post("/api/payments",
         if (order.status === OrderStatus.Cancelled) {
             throw new BadRequestError('Order has been cancelled');
         }
-        await stripe.charges.create({
+        const charge = await stripe.charges.create({
             currency: "USD",
             amount: order.price * 100,
             source: token
         })
-        res.send({ success: true });
+        const payment = Payment.build({ orderId, stripeId: charge.id });
+        await payment.save();
+        new PaymentCreatedPublisher(natsWrapper.client).publish(
+            {
+                id: payment._id.toHexString(),
+                orderId: payment.orderId,
+                stripeId: payment.stripeId
+            }
+        );
+        res.status(201).send({ id: payment._id });
     }
 );
 
