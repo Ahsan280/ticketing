@@ -6,6 +6,7 @@ import { TicketUpdatedListener } from "./events/listeners/ticket-updated-listene
 import { ExpirationCompleteListener } from "./events/listeners/expiration-complete-listener";
 import { PaymentCreatedListener } from "./events/listeners/payment-created-listener";
 const start = async () => {
+  console.log("starting....");
   if (!process.env.JWT_KEY) {
     throw new Error("JWT_KEY must be defined");
   }
@@ -25,9 +26,9 @@ const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("Connected to MongoDB !!");
-    
+
     await natsWrapper.connect(process.env.NATS_CLUSTER_ID, process.env.NATS_CLIENT_ID, process.env.NATS_URL);
-    
+
     natsWrapper.client.on("close", () => {
       console.log("Nats connection closed!");
       process.exit();
